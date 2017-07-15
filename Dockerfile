@@ -3,10 +3,9 @@
 #
 
 FROM alpine
-MAINTAINER Dennis Yu <forever88959@gmail.com>
 
-ARG SS_VER=2.5.5
-ARG SS_URL=https://github.com/shadowsocks/shadowsocks-libev/archive/v$SS_VER.tar.gz
+ARG SS_VER=3.0.7
+ARG SS_URL=https://github.com/shadowsocks/shadowsocks-libev/releases/download/v$SS_VER/shadowsocks-libev-$SS_VER.tar.gz
 
 ENV SERVER_ADDR 0.0.0.0
 ENV SERVER_PORT 8388
@@ -15,19 +14,21 @@ ENV METHOD      aes-256-cfb
 ENV TIMEOUT     300
 ENV DNS_ADDR    8.8.8.8
 ENV DNS_ADDR_2  8.8.4.4
+ENV ARGS=
 
 RUN set -ex && \
     apk add --no-cache --virtual .build-deps \
-                                asciidoc \
                                 autoconf \
                                 build-base \
                                 curl \
+                                libev-dev \
                                 libtool \
                                 linux-headers \
-                                openssl-dev \
+                                libsodium-dev \
+                                mbedtls-dev \
                                 pcre-dev \
                                 tar \
-                                xmlto && \
+                                udns-dev && \
     cd /tmp && \
     curl -sSL $SS_URL | tar xz --strip 1 && \
     ./configure --prefix=/usr --disable-documentation && \
@@ -56,6 +57,5 @@ CMD ss-server -s $SERVER_ADDR \
               --fast-open \
               -d $DNS_ADDR \
               -d $DNS_ADDR_2 \
-              -U \
-              -u
-
+              -u \
+              $ARGS
